@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <link rel="stylesheet" href="./assets/style.css">
     <script src="https://kit.fontawesome.com/632cd1cff0.js" crossorigin="anonymous"></script>
-    <script src="script.js" defer></script>
+    <script src="./assets/js/script.js" defer></script>
 </head>
 <body>
     <div class="black-headband">
@@ -33,7 +33,7 @@
                 <button class="js-modal-close"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <h1>Ajout photo</h1>
-            <form method="post" action="" id="form">
+            <form method="post" action="" id="form"></form>
                 <div class="choose-picture">
                     <i class="fa-regular fa-image"></i>
                     <input type="file" class="upload-picture" name="photo" id="id-input" style="display:none">
@@ -46,8 +46,13 @@
                 </div>
 				<div class="formulaire-modal2">
 					<label for="categorie">Catégorie</label>
-					<input type="select" name="categorie" id="categorie" required>
-					<i class="fa-solid fa-chevron-down"></i>
+                    <select name="categorie" id="liste-categorie"required >
+                    <option value="" ></option>
+                    <option value="1">Objets</option>
+                    <option value="2">Appartements</option>
+                    <option value="3">Bar & Restaurants</option>
+                </select>
+                <i class="fa-solid fa-chevron-down"></i>
 			</div>
                 <hr class="bordure-ajout-img">
                 <button class="add-img-valider"><a href="">Valider</a></button>
@@ -108,5 +113,6 @@
         </ul>
     </nav>
 </footer>
+<script src="./assets/js/modal.js"></script>
 </body>
 </html>

@@ -23,14 +23,14 @@ formulaire.addEventListener("submit", (event) => {
         })
 
     }).then((response) => {
-        console.log(response)
+       
         response.json().then((data) => {
             console.log(data)
 
             if (data.token != null) {
                 localStorage.setItem("tokenIdentification", data.token)
                 window.location.href = "http://127.0.0.1:5500"
-                console.log(data.token)
+                
             }
             else {
                 alert("Identifiant ou mot de passe incorrect")
