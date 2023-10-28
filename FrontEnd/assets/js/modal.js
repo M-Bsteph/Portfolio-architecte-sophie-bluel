@@ -1,6 +1,5 @@
-// Ton fichier principal
 
-import { fetchImages, deleteImageRequest, fetchCategories } from './request.js';
+import { getRequest,postRequest,deleteRequest } from './request.js';
 
 // Fonction pour afficher l'aperçu de l'image sélectionnée
 function showPreview(event) {
@@ -55,6 +54,7 @@ function closeModal() {
 openModalButton.addEventListener('click', () => {
     openFirstModal();
     loadImages();
+    
 });
 
 // Événement au clic sur la croix pour fermer la première modal
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Fonction pour charger les images dans la première modal
 function loadImages() {
-    fetchImages()
+    getRequest("http://localhost:5678/api/works")
         .then(images => {
             // Sélectionne l'élément où tu veux ajouter les images (par exemple, un div avec l'id 'image-container')
             const imageContainer = modal.querySelector('#image-container');
@@ -85,13 +85,23 @@ function loadImages() {
             // Ajoute chaque image à l'élément
             images.forEach(image => {
                 const imgElement = document.createElement('div');
+                imgElement.id="modal-work-"+image.id
                 imgElement.innerHTML = `
                     <img src="${image.imageUrl}" alt="${image.title}">
-                    <i class="fa fa-trash-can" onclick="deleteImage(${image.id})"></i>
+                    <i class="fa fa-trash-can trash-btn" data-id=${image.id} ></i>
                 `;
                 imageContainer.appendChild(imgElement);
             });
         })
+        .then(() => {
+            const trashButtons = document.querySelectorAll(".trash-btn");
+            console.log(trashButtons);
+            trashButtons.forEach((btn) => {
+              btn.addEventListener("click", function () {
+                 deleteImage(btn.dataset.id)
+              });
+            });
+          })
         .catch(error => console.error('Erreur lors du chargement des images:', error));
 }
 
@@ -198,18 +208,28 @@ addPhotoButton.addEventListener('click', () => {
     addPhotoModal.style.display = 'block';
 });
 
+
 // Fonction pour supprimer une photo en fonction de son identifiant
 function deleteImage(id) {
-    deleteImageRequest(id)
+    deleteRequest('http://localhost:5678/api/works/'+id)
         .then(() => {
-            loadImages(); // Recharge les images après la suppression
+            const deletedWorkElement = document.getElementById(`work-${id}`);
+            const deletedModalElement = document.getElementById(`modal-work-${id}`);
+
+            if (deletedWorkElement) {
+                deletedWorkElement.remove();
+            }
+
+            if (deletedModalElement) {
+                deletedModalElement.remove();
+            }
         })
         .catch(error => console.error('Erreur lors de la suppression de l\'image:', error));
 }
 
 // Fonction pour charger les catégories depuis l'API
 function loadCategoriesDropdown() {
-    fetchCategories()
+    getRequest("http://localhost:5678/api/categories")
         .then(categories => {
             const categoryDropdown = addPhotoModal.querySelector('#categorie');
 

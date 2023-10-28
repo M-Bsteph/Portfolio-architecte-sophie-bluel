@@ -1,5 +1,6 @@
+
 // Importe les fonctions depuis request.js
-import { loadCategories, loadWorks } from './request.js';
+import { getRequest} from './request.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   // Variables
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
     gallery.innerHTML = "";
 
     // Utilise loadWorks ici
-    loadWorks().then((works) => {
+    getRequest("http://localhost:5678/api/works").then((works) => {
       for (const id in works) {
         const work = works[id];
         if (filterValue == "all" || work.category.id == filterValue) {
@@ -73,8 +74,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Initialisation
 
   // Charger les catégories et créer les boutons correspondants
-  loadCategories().then((categories) => createCategoryButtons(categories));
+ getRequest("http://localhost:5678/api/categories").then((categories) => createCategoryButtons(categories));
 
   // Charger les œuvres et créer les éléments de figure correspondants dans la galerie
-  loadWorks().then((works) => works.forEach((work) => gallery.appendChild(createFigure(work))));
+  getRequest("http://localhost:5678/api/works").then((works) => works.forEach((work) => gallery.appendChild(createFigure(work))));
 });
