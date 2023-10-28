@@ -1,3 +1,6 @@
+// Importe les fonctions de requête
+import { getRequest, postRequest, deleteRequest } from './request.js';
+
 // Fonction pour vérifier l'état de connexion
 function checkConnection() {
   return localStorage.getItem("tokenIdentification") !== null;
@@ -21,10 +24,14 @@ function hideButton() {
 // Fonction pour déconnecter l'utilisateur
 function logoutUser() {
   const deleteTokenStorage = document.getElementById("logout");
-  
+
   deleteTokenStorage.addEventListener("click", () => {
-      localStorage.removeItem("tokenIdentification");
-      window.location.href = "http://127.0.0.1:5500/index.html";
+      deleteRequest("http://api.example.com/logout") // Remplace l'URL par celle de ta déconnexion
+        .then(() => {
+          localStorage.removeItem("tokenIdentification");
+          window.location.href = "http://127.0.0.1:5500/index.html";
+        })
+        .catch(error => console.error('Error:', error));
   });
 }
 
@@ -35,10 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
   if (checkConnection()) {
       showLogout.textContent = "logout";
       showLogout.id = "logout";
-      
+
       // Appeler la fonction pour déconnecter l'utilisateur
       logoutUser();
-      
+
       // Appeler la fonction pour afficher le bandeau et le bouton de modification
       showHeaderAndButton();
   } else {

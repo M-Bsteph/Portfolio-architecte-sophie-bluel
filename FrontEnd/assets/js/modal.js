@@ -1,199 +1,228 @@
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("Le DOM est chargé");
+// Ton fichier principal
 
-    const boutonOuvrirModal = document.getElementById("open-modal");
-    const modal1 = document.getElementById("modal1");
-    const boutonsFermerModal = document.querySelectorAll(".js-modal-close");
-    const overlay = document.querySelector(".overlay");
-    const projetsModal = document.querySelector(".projets-modal");
-    const inputPhoto = document.getElementById("photo-input");
-    const modal2 = document.getElementById("js-modal-add-project");
-    const imagePreview = document.getElementById("imgpreview");
-    const titleInput = document.getElementById("Title-photo");
-    const categoriesSelect = document.getElementById("categories");
+import { fetchImages, deleteImageRequest, fetchCategories } from './request.js';
 
-    function ouvrirModal() {
-        console.log("Ouverture du modal");
-        modal1.style.display = "block";
-        overlay.style.display = "block";
+// Fonction pour afficher l'aperçu de l'image sélectionnée
+function showPreview(event) {
+    const input = event.target;
+    const previewImage = document.getElementById('preview-new-image');
+    const choosePictureDiv = document.querySelector('.choose-picture');
+
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            previewImage.src = e.target.result;
+            // Remplace le contenu de la div "choose-picture" par l'image
+            choosePictureDiv.innerHTML = `<img src="${e.target.result}" alt="Selected Image">`;
+        };
+        reader.readAsDataURL(file);
     }
+}
 
-    function fermerModal() {
-        console.log("Fermeture du modal");
-        modal1.style.display = "none";
-        overlay.style.display = "none";
-    }
+// Récupère le bouton "Modifier" et la première modal
+const openModalButton = document.getElementById('open-modal');
+const modal = document.createElement('div');
 
-    function changerImage(event) {
-        console.log("Changement d'image");
-        const fichierInput = event.target;
+// Ajoute les classes et le contenu à la première modal
+modal.classList.add('modal');
+modal.innerHTML = `
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Galerie photo</h2>
+        <div id="image-container"></div>
+        <button id="add-photo-button">Ajouter une photo</button>
+    </div>
+`;
 
-        if (imagePreview && fichierInput.files.length > 0) {
-            console.log("Début du chargement de l'image");
-       
-             
-                const lecteur = new FileReader();
-                lecteur.onload = function () {
-                    console.log("L'image a été chargée avec succès");
-                    imagePreview.src = lecteur.result;
-                    // Cache l'élément imageFormDisplay
-            const imageFormDisplay = document.querySelector(".imageFormDisplay");
-            if (imageFormDisplay) {
-                imageFormDisplay.style.display = "none";
-            }
-            };
+// Récupère le bouton pour fermer la première modal
+const closeModalButton = modal.querySelector('.close-modal');
 
-            lecteur.readAsDataURL(fichierInput.files[0]);
-        }
-    }
+// Ajoute la première modal au body
+document.body.appendChild(modal);
 
-    function supprimerTravail(travailId) {
-        // Supprimer l'élément du DOM
-        const workContainer = document.querySelector(`.work-container[data-id="${travailId}"]`);
-        if (workContainer) {
-            workContainer.remove();
-        }
+// Fonction pour ouvrir la première modal
+function openFirstModal() {
+    modal.style.display = 'block';
+}
 
-        // Envoyer une requête au serveur pour supprimer le travail côté serveur
-        fetch(`http://localhost:5678/api/works/${travailId}`, {
-            method: 'DELETE',
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Travail supprimé avec succès :", data);
-        })
-        .catch(error => console.error("Erreur lors de la suppression du travail :", error));
-    }
+// Fonction pour fermer la première modal
+function closeModal() {
+    modal.style.display = 'none';
+}
 
-    function ouvrirModal2() {
-        console.log("Ouverture du modal 2");
-        modal2.style.display = "block";
-        overlay.style.display = "block";
-        // Appelle changerImage pour mettre à jour l'aperçu de l'image lorsque le modal est ouvert
-    changerImage({ target: inputPhoto });
-    }
-
-    function retourModal1() {
-        console.log("Retour à modal 1");
-        modal2.style.display = "none";
-        overlay.style.display = "none";
-        ouvrirModal(); // Ouvrir à nouveau modal1
-    }
-
-    boutonOuvrirModal.addEventListener("click", ouvrirModal);
-
-    boutonsFermerModal.forEach(function (bouton) {
-        bouton.addEventListener("click", fermerModal);
-    });
-
-    overlay.addEventListener("click", function (event) {
-        if (event.target === overlay) {
-            fermerModal();
-        }
-    });
-
-    inputPhoto.addEventListener("input", ouvrirModal2);
-
-    const addPhotoInput = document.querySelector(".add-photo");
-
-    addPhotoInput.addEventListener("click", ouvrirModal2);
-
-    const boutonRetourModal2 = document.querySelector(".js-modal-return");
-
-    boutonRetourModal2.addEventListener("click", retourModal1);
-
-    // Récupérer les catégories depuis l'API 
-    fetch("http://localhost:5678/api/categories")
-        .then(response => response.json())
-        .then(categories => {
-            categories.forEach(category => {
-                const option = document.createElement("option");
-                option.value = category.id;
-                option.text = category.name;
-                categoriesSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error("Erreur lors de la récupération des catégories :", error));
-
-    fetch("http://localhost:5678/api/works")
-        .then(response => response.json())
-        .then(data => {
-            console.log("Données récupérées avec succès :", data);
-
-            data.forEach(item => {
-                const imageUrl = item.imageUrl;
-                console.log("Image URL:", imageUrl);
-
-                const workContainer = document.createElement("div");
-                workContainer.classList.add("work-container");
-                workContainer.dataset.id = item.id;
-
-                const imageElement = document.createElement("img");
-                imageElement.src = imageUrl;
-                console.log("Image Element SRC:", imageElement.src);
-                workContainer.appendChild(imageElement);
-
-                const deleteButton = document.createElement("i");
-                deleteButton.classList.add("fas", "fa-trash-alt", "delete-button");
-                deleteButton.addEventListener("click", function () {
-                    supprimerTravail(item.id);
-                });
-                workContainer.appendChild(deleteButton);
-
-                projetsModal.appendChild(workContainer);
-            });
-        })
-        .catch(error => console.error("Erreur lors de la récupération des données :", error));
-
-    inputPhoto.addEventListener("change", changerImage);
+// Événement au clic sur le bouton "Modifier"
+openModalButton.addEventListener('click', () => {
+    openFirstModal();
+    loadImages();
 });
 
+// Événement au clic sur la croix pour fermer la première modal
+closeModalButton.addEventListener('click', closeModal);
 
+// Événement pour fermer la première modal en dehors de celle-ci
+window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        closeModal();
+    }
+});
 
-// Ajouter un écouteur d'événements au formulaire modal pour la soumission
-const form = document.querySelector('.modal-form'); // Ajout de cette ligne pour sélectionner le formulaire
+// Empêche l'ouverture automatique de la première modal lors de l'actualisation de la page
+document.addEventListener('DOMContentLoaded', () => {
+    closeModal();
+});
 
-form.addEventListener('submit', function (event) {
-    event.preventDefault(); // Empêcher la soumission par défaut du formulaire
-    var formData = new FormData(form);
+// Fonction pour charger les images dans la première modal
+function loadImages() {
+    fetchImages()
+        .then(images => {
+            // Sélectionne l'élément où tu veux ajouter les images (par exemple, un div avec l'id 'image-container')
+            const imageContainer = modal.querySelector('#image-container');
 
-    // Effectuer une requête POST vers le serveur local
-    fetch("http://localhost:5678/api/works", {
-        method: "POST", // Utiliser la méthode POST pour envoyer les données
-        body: formData, // Utiliser l'objet FormData comme corps de la requête
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Gère la réponse du serveur ou de l'API
-        console.log(data);
-        // Ajouter des actions supplémentaires ici, par exemple, fermer le modal
-        fermerModal();
-    })
-    .catch(error => {
-        // Gère les erreurs d'envoi
-        console.error('Erreur d\'envoi du formulaire:', error);
-    });
-})
+            // Vide le contenu actuel de l'élément
+            imageContainer.innerHTML = '';
 
-// Fonction pour retirer l'image
-function removeImage() {
-    const imagePreview = document.getElementById("imgpreview");
-    const imageFormDisplay = document.querySelector(".imageFormDisplay");
-    const faimage = document.querySelector(".fa-image");
-    const fileUpload = document.querySelector(".file-upload");
-    const photoInput = document.querySelector("#photo-input");
-    const fileFormat = document.querySelector(".fileFormat");
-
-    imageFormDisplay.style.display = "none";
-    faimage.style.display = "block";
-    fileUpload.style.display = "block";
-    photoInput.style.display = "none";
-    fileFormat.style.display = "block";
-    imagePreview.src = "";
+            // Ajoute chaque image à l'élément
+            images.forEach(image => {
+                const imgElement = document.createElement('div');
+                imgElement.innerHTML = `
+                    <img src="${image.imageUrl}" alt="${image.title}">
+                    <i class="fa fa-trash-can" onclick="deleteImage(${image.id})"></i>
+                `;
+                imageContainer.appendChild(imgElement);
+            });
+        })
+        .catch(error => console.error('Erreur lors du chargement des images:', error));
 }
-inputPhoto.addEventListener("change", changerImage);
 
-// Appelle la fonction removeImage au moment approprié, par exemple, lorsqu'un bouton "Supprimer" est cliqué.
-const boutonSupprimerImage = document.getElementById("boutonSupprimerImage");
+// Récupère le bouton "Ajouter une photo" à l'intérieur de la première modal
+const addPhotoButton = modal.querySelector('#add-photo-button');
 
-boutonSupprimerImage.addEventListener("click", removeImage);
+// Vérifie si la deuxième modal d'ajout de photo existe déjà
+let addPhotoModal = document.getElementById('add-photo-modal');
+
+// Événement au clic sur le bouton "Ajouter une photo" à l'intérieur de la première modal
+addPhotoButton.addEventListener('click', () => {
+    // Si la deuxième modal existe déjà, l'affiche, sinon, la crée
+    if (!addPhotoModal) {
+        addPhotoModal = document.createElement('div');
+        addPhotoModal.id = 'add-photo-modal';
+        addPhotoModal.classList.add('modal');
+        addPhotoModal.innerHTML = `
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <button class="js-modal2-back"><i class="fa-solid fa-arrow-left"></i></button>
+                <h2>Ajout photo</h2>
+                <form method="post" action="" id="form">
+                    <div class="choose-picture">
+                        <div class="preview-upload">
+                            <img src="" alt="" id="preview-new-image">
+                        </div>
+                        <i class="fa-regular fa-image"></i>
+                        <input type="file" class="upload-picture" name="photo" id="id-input" style="display:none">
+                        <label class="upload-picture" id="btn-add-img" for="id-input">+ Ajouter photo</label>
+                        <p class="max-size-img">jpg, png : 4mo max</p>
+                    </div>
+                    <div class="formulaire-modal2">
+                        <label for="titre">Titre</label>
+                        <input type="text" name="Titre" id="titre" autofocus required>
+                    </div>
+                    <div class="formulaire-modal2">
+                        <label for="categorie">Catégorie</label>
+                        <select name="categorie" id="categorie" required>
+                            <option value=""></option>
+                        </select>
+                        </div>
+                        <hr class="bordure-ajout-img">
+                        <button type="submit" id="valider-nouvelle-img" class="add-img-valider">Valider</button>
+                </form>
+            </div>
+        `;
+
+        // Récupère le bouton pour fermer la deuxième modal
+        const closeAddPhotoModalButton = addPhotoModal.querySelector('.close-modal');
+        // Récupère le bouton de retour à l'intérieur de la deuxième modal
+        const backToGalleryButton = addPhotoModal.querySelector('.js-modal2-back');
+
+        // Ajoute la deuxième modal au body
+        document.body.appendChild(addPhotoModal);
+
+        // Fonction pour fermer la deuxième modal
+        function closeAddPhotoModal() {
+            addPhotoModal.style.display = 'none';
+        }
+
+        // Événement au clic sur la croix pour fermer la deuxième modal
+        closeAddPhotoModalButton.addEventListener('click', closeAddPhotoModal);
+
+        // Événement au clic sur le bouton de retour pour retourner à la galerie (première modal)
+        backToGalleryButton.addEventListener('click', () => {
+            closeAddPhotoModal();
+            openFirstModal(); // Fonction pour ouvrir la première modal
+        });
+
+        // Récupère le formulaire dans la deuxième modal
+        const form = addPhotoModal.querySelector('#form');
+
+        // Événement de soumission du formulaire
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Empêche le comportement par défaut du formulaire (rechargement de la page)
+
+            // Ajoute ici le code pour traiter les données du formulaire
+            // (par exemple, envoyer une requête HTTP pour enregistrer les données sur le serveur)
+
+            // Ensuite, tu peux fermer la deuxième modal si nécessaire
+            closeAddPhotoModal();
+        });
+
+        // Récupère le champ de fichier
+        const fileInput = addPhotoModal.querySelector('#id-input');
+
+        // Écoute les changements dans le champ de fichier
+        fileInput.addEventListener('change', function(event) {
+            showPreview(event);
+        });
+
+        // Appelle la fonction pour charger les catégories dans le dropdown
+        loadCategoriesDropdown();
+
+        // Événement pour fermer la deuxième modal en dehors de celle-ci
+        window.addEventListener('click', (event) => {
+            if (event.target === addPhotoModal) {
+                closeAddPhotoModal();
+            }
+        });
+    }
+
+    // Ouvre la deuxième modal d'ajout de photos
+    addPhotoModal.style.display = 'block';
+});
+
+// Fonction pour supprimer une photo en fonction de son identifiant
+function deleteImage(id) {
+    deleteImageRequest(id)
+        .then(() => {
+            loadImages(); // Recharge les images après la suppression
+        })
+        .catch(error => console.error('Erreur lors de la suppression de l\'image:', error));
+}
+
+// Fonction pour charger les catégories depuis l'API
+function loadCategoriesDropdown() {
+    fetchCategories()
+        .then(categories => {
+            const categoryDropdown = addPhotoModal.querySelector('#categorie');
+
+            // Vide le contenu actuel du dropdown
+            categoryDropdown.innerHTML = '';
+
+            // Ajoute chaque catégorie comme une option du dropdown
+            categories.forEach(category => {
+                const optionElement = document.createElement('option');
+                optionElement.value = category.id;
+                optionElement.textContent = category.name;
+                categoryDropdown.appendChild(optionElement);
+            });
+        })
+        .catch(error => console.error('Erreur lors du chargement des catégories:', error));
+}

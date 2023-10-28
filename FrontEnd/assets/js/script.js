@@ -1,7 +1,8 @@
-document.addEventListener('DOMContentLoaded', async function() {
+import { deleteWork, getWorks } from ' ./request.js';
+
+document.addEventListener('DOMContentLoaded', async function () {
     let isConnect = localStorage.getItem("tokenIdentification") !== null;
     const gallery = document.querySelector(".gallery");
-    const modalImg = document.querySelector(".projects-modal");
     const modalImgContainer = document.querySelector(".modal-img");
 
     if (modalImgContainer) {
@@ -10,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 async function loadImgModal() {
-    const works = await loadWorks();
+    const works = await getWorks();
     const modalImgContainer = document.querySelector(".modal-img");
 
     if (modalImgContainer) {
@@ -21,38 +22,35 @@ async function loadImgModal() {
             const trashCanIcon = document.createElement("i");
             trashCanIcon.className = "fa-solid fa-trash-can";
             trashCanIcon.id = work.id;
-
             trashCanIcon.addEventListener("click", (event) => deleteImg(event));
+
             figElement.appendChild(trashCanIcon);
-            modalImg.appendChild(figElement);
+            modalImgContainer.appendChild(figElement);
         });
     }
 }
 
-function deleteImg(event) {
+async function deleteImg(event) {
     const workId = event.target.id;
-    const token = localStorage.getItem("tokenIdentification");
 
-    fetch(`http://localhost:5678/api/works/${workId}`, {
-        method: "DELETE",
-        headers: { "Authorization": "Bearer " + token },
-    })
-        .then(response => {
-            if (response.ok) {
-                const deletedWorkElement = document.getElementById(`work-${workId}`);
-                if (deletedWorkElement) {
-                    deletedWorkElement.remove();
-                }
+    try {
+        const deletionSuccessful = await deleteWork(workId);
 
-                const deletedModalElement = document.getElementById(`modal-work-${workId}`);
-                if (deletedModalElement) {
-                    deletedModalElement.remove();
-                }
+        if (deletionSuccessful) {
+            const deletedWorkElement = document.getElementById(`work-${workId}`);
+            const deletedModalElement = document.getElementById(`modal-work-${workId}`);
+
+            if (deletedWorkElement) {
+                deletedWorkElement.remove();
             }
-        })
-        .catch(error => {
-            console.error('Error deleting image:', error);
-        });
+
+            if (deletedModalElement) {
+                deletedModalElement.remove();
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors de la suppression de l\'image :', error);
+    }
 }
 
 async function loadWorks() {
