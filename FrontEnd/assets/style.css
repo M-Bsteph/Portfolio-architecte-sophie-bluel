@@ -503,7 +503,7 @@ span {
         left: 510px;
         top: 1229px;
     }
-    .add-img-valider {
+    .submit-button{
         display: flex;
         border-radius: 60px;
         border: 1px solid #1D6154;
@@ -524,7 +524,7 @@ span {
         width: 237px;
         height: 36px;
     }
-    .add-img-valider {
+    .submit-button {
        color: #FFF; 
     }
     
