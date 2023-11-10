@@ -408,126 +408,144 @@ span {
     margin-top: 20px;
     }
 
-    .choose-picture {
-        background-color: #E8F1F6;
-        width: 379px;
-        height: 169px;
-        top: 786px;
-        left: 510px;
+    .modal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;	
+        width: 65%;
+    }
+    
+    .modal-form > input {
+        height: 51px;
+        background: #FFFFFF;
+        box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+        border:  none;	
+    }
+    
+    .modal-form > select {
+        font-family: 'Work Sans';
+        height: 51px;
+        background: #FFFFFF;
+        box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+        border: none;
+        margin-bottom: 20px;
+        padding-left: 20px;
+    
+    }
+    
+    #validerButton {
+        background: #A7A7A7;
+        border-radius: 60px;
+        padding: 10px 140px 10px 140px;
+        border: none;
+        display: flex;
+        justify-content: center;
+        width: 237px;
+        height: 38px;
+        color: #FFF;
+        font-family: Syne;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    
+    #validerButton.green-button {
+        background-color: #1D6154;
+        color: white
+      }
+    
+    .select-photo {
+        background: #E8F1F7;
         border-radius: 3px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        margin-bottom: 10px;
+        gap: 10px;
+        flex: 1;
     }
     
-    .fa-image {
-        font-size: xxx-large;
-        margin-bottom: 10px;
-        padding: 9.5px, 3.93px, 6.88px, 3.93px;
-        color: #d1d1d1;
-    
-    }
-    .upload-picture {
-        width: 173px;
-        height: 36px;
-        top: 881px;
-        left: 633px;
-        border-radius: 50px;
-        border:none;
-        background-color: #d1d1d1;
-        color: #2d6580;
-        display:flex;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .formulaire label {
-        margin-top: 10px;
-        margin-bottom: 10px;
-    }
-    
-    
-    
-    .choose-picture p {
+    .select-photo > p {
+        text-align: center;
+        padding-bottom: 20px;
+        color: #444;
+        text-align: center;
         font-family: Work Sans;
         font-size: 10px;
+        font-style: normal;
         font-weight: 400;
-        line-height: 12px;
-        letter-spacing: 0em;
-        text-align: center;
     }
-    img[alt="Selected Image"] {
-        width: 129px;
-        height: 193px;
-    }
- 
-    .formulaire label {
-        margin-top: 10px;
-        margin-bottom: 10px;
-    }
-    .formulaire-modal2 input{
-        width: 379px;
-        height: 51px;
-        background: #FFF;
-        box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.09);
-        border: none;
-        font-size: 16px;
-        font-family: work sans;
-        margin-top: 10px;
-    }
-    .formulaire-modal2 select{
-        width: 379px;
-        height: 51px;
-        background: #FFF;
-        box-shadow: 0px 4px 14px 0px rgba(0, 0, 0, 0.09);
-        border: none;
-        font-size: 16px;
-        font-family: work sans;
-        margin-top: 10px;
+    .select-photo > i {
+        color: #B9C5CC;
+        font-size: 50px;
+        display: flex;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 15px;
+    
     }
     
-    
-    .formulaire-modal2 {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 22px;
-    }
-    hr {
-        border: none;
-        color: #B3B3B3;
-        width: 420px;
-        height: 0px;
-        border: 1px solid #B3B3B3;
-        left: 510px;
-        top: 1229px;
-    }
-    .submit-button{
-        display: flex;
-        border-radius: 60px;
-        border: 1px solid #1D6154;
-        background-color: #1D6154;
+    .imageFormDisplay{
+        display: none;
         justify-content: center;
         align-items: center;
-        text-align: center;
-        font-size: 16px;
-        font-family: Syne;
-        font-style: normal;
-        font-weight: 100;
-        line-height: normal;
-        padding-top: 8px;
-        padding-bottom: 8px;
-        padding-left: 15px;
-        padding-right: 15px;
-        margin: 20px;
-        width: 237px;
-        height: 36px;
+        position: relative;
     }
-    .submit-button {
-       color: #FFF; 
+    .imageFormDisplay > img {
+        height: 200px;
+    }
+    .remove{
+        position: absolute;
+        top: 5px;
+        right: 5px;
     }
     
+    .file-upload {
+        background: #CBD6DC;
+        border-radius: 50px;
+        text-align: center;
+        color: #306685;
+        font-family: Work Sans;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        width: 173px;
+        height: 36px;
+        flex-shrink: 0;
+        cursor: pointer;
+        border: none;
+    }
+    
+    .jpg,.jpeg, .png, .webp  {
+        color: #444;
+        text-align: center;
+        font-family: Work Sans;
+        font-size: 10px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+    }
+        
+    #photo-input {
+        display: none;
+    } 
+    
+    #title-photo {	
+        font-family: 'Work Sans';
+        padding-left: 20px;
+    }
+    
+    
+    #error-message-modal {
+        color: red;
+        border: 0.5px solid #B3B3B3;
+    }
+    
+    .editer{
+        margin-top: 5px;
+    }
 /* PAGE LOGIN ***********************************  */
 .login h2 {
     display: flex;
@@ -606,4 +624,115 @@ width: 20px;
 }
 .image-preview{
 	font-size: 50px;
+}
+#preview-new-image{
+    width: 129px;
+    height:193px ;
+}
+
+
+
+
+form {
+	display: flex;
+	flex-direction: column;
+}
+
+.blocToAddPicture {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 420px;
+  	border-radius: 3px;
+  	background: #E8F1F6;
+	margin-top: 36px;
+	height: 169px;
+}
+
+.formPicturePreview {
+	height: 169px;
+	width: 129px;
+}
+
+.labelPicturePreview {
+	cursor: pointer;
+}
+
+.iconeFormPicture {
+	color: #CBD6DC;
+	font-size: 70px;
+	margin-top: 18px;
+}
+
+.addPictureBtn {
+	width: 173px;
+	padding: 10px;
+	border-radius: 50px;
+	text-align: center;
+	cursor: pointer;
+	background: #CBD6DC;
+	color: #306685;
+	margin-top: 6px;
+	font-family: Work Sans;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.pictureBtnHidden {
+	opacity: 0;
+	height: 0;
+}
+
+.formatIndication {
+	color: black;
+	text-align: center;
+	font-family: Work Sans;
+	font-size: 10px;
+	font-style: normal;
+	font-weight: 400;
+	line-height: normal;
+	margin-top: 7px;
+}
+  
+.titleFormLabel {
+	margin-top: 20px;
+	margin-bottom: 10px;
+	color: #3D3D3D;
+	line-height: 16px;
+	font-weight: 500;
+}
+
+#pictureTitle, #categoryName {
+	border: none;
+	box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+	background: #FFF;
+	width: 420px;
+	height: 51px;
+	font-family: Work Sans;
+	font-size: 14px;
+	font-weight: 400;
+	color: #444444;
+}
+ 
+#categoryName {
+	margin-bottom: 40px
+}
+  
+.submitBtn {
+	margin : 35px auto;
+	width: 237px;
+  	height: 36px;
+	border-radius: 60px;
+	border: none;
+	color: #FFF;
+	background-color: #1D6154;
+	text-align: center;
+	font-family: Syne;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.btnDisabled {
+	background-color: #A7A7A7;
+	cursor: default;
 }

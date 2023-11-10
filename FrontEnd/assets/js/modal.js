@@ -1,27 +1,32 @@
 // Importe les fonctions getRequest, postRequest et deleteRequest depuis le fichier request.js
 import { getRequest, postRequest, deleteRequest } from './request.js';
 
-// Fonction pour afficher l'aperçu de l'image sélectionnée
+// Fonction pour afficher un aperçu de l'image sélectionnée
 function showPreview(event) {
-    const input = event.target;
-    const previewImage = document.getElementById('preview-new-image');
-    const choosePictureDiv = document.querySelector('.choose-picture');
+    const blocToAddPicture = document.querySelector(".blocToAddPicture");
+    blocToAddPicture.innerHTML = "";
 
-    const file = input.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            previewImage.src = e.target.result;
-            // Remplace le contenu de la div "choose-picture" par l'image
-            choosePictureDiv.innerHTML = `<img src="${e.target.result}" alt="Selected Image">`;
-        };
-        reader.readAsDataURL(file);
-    }
+    blocToAddPicture.innerHTML = /* html */
+        `<label for="addPictureFile" class="labelPicturePreview">
+        <img class="formPicturePreview">
+    </label>
+    <input id="addPictureFile" type="file" name="addPictureFile" class="pictureBtnHidden addFile" accept=".jpg, .png">
+    `;
+
+    const formPicturePreview = /** @type {HTMLImageElement} */ (document.querySelector(".formPicturePreview"));
+    formPicturePreview.src = URL.createObjectURL(this.files[0]);
+
+    const pictureTitle = /** @type {HTMLInputElement} */ (document.querySelector(".pictureTitle"));
+    formPicturePreview.alt = pictureTitle.value;
+
+    const addFile = document.querySelector(".addFile");
+    addFile.addEventListener("change", showPreview);
 }
 
 // Récupère le bouton "Modifier" et la première modal
 const openModalButton = document.getElementById('open-modal');
 const modal = document.createElement('div');
+const secondModal = document.createElement('div'); // Déclarez secondModal ici
 
 // Ajoute les classes et le contenu à la première modal
 modal.classList.add('modal');
@@ -87,7 +92,7 @@ function loadImages() {
                 imgElement.id = "modal-work-" + image.id;
                 imgElement.innerHTML = `
                     <img src="${image.imageUrl}" alt="${image.title}">
-                    <i class="fa fa-trash-can trash-btn" data-id=${image.id} ></i>
+                    <i class="fa fa-trash-can trash-btn" data-id=${image.id}></i>
                 `;
                 imageContainer.appendChild(imgElement);
             });
@@ -115,46 +120,36 @@ addPhotoButton.addEventListener('click', () => {
 
 //<!-- Fonction pour ouvrir la deuxième modal -->
 function openSecondModal() {
-    // Crée la deuxième modal
-    const secondModal = document.createElement('div');
+
     secondModal.classList.add('modal');
     secondModal.innerHTML = `
         <div class="modal-content">
             <span class="close-modal">&times;</span>
             <button class="js-modal2-back"><i class="fa-solid fa-arrow-left"></i></button>
             <h2>Ajouter une photo</h2>
-            
-            <form class="add-picture-form" method="post" action="" id="form">
-                <div class="choose-picture">
-                    <div class="preview-upload">
-                        <img src="" alt="" id="preview-new-image">
-                    </div>
-                    <i class="fa-regular fa-image"></i>
-                    <input type="file" class="upload-picture" name="photo" id="id-input" style="display:none">
-                    <label class="upload-picture" id="btn-add-img" for="id-input">+ Ajouter photo</label>
-                    <p class="max-size-img">jpg, png : 4mo max</p>
+
+            <form class="formModal" enctype="multipart/form-data">
+                <div class="blocToAddPicture">
+                    <i class="fa-regular fa-image iconeFormPicture"></i>
+                    <label for="addPictureFile" class="addPictureBtn">+ Ajouter une photo</label>
+                    <input id="addPictureFile" type="file" name="addPictureFile" class="pictureBtnHidden addFile" accept=".jpg, .png" required>
+                    <p class="formatIndication">jpg, png : 4mo max</p>
                 </div>
-                <div class="formulaire-modal2">
-                    <label for="titre">Titre</label>
-                    <input type="text" name="Titre" id="titre" autofocus required>
-                </div>
-                <div class="formulaire-modal2">
-                    <label for="categorie">Catégorie</label>
-                    <select name="categorie" id="categorie" required>
-                        <option value=""></option>
-                        <option value="1">Objets</option>
-                        <option value="2">Appartements</option>
-                        <option value="3">Hotel & Restaurants</option>
-                        <!-- Ajoute ici les options de catégorie -->
-                    </select>
-                </div>
-                <hr class="bordure-ajout-img">
-                
-                <!-- Ajoute un bouton Submit avec un id -->
-                <button type="submit" class="submit-button" id="submit-btn">Valider</button>
+                <label for="pictureTitle" class="titleFormLabel">Titre</label>
+                <input type="text" id="pictureTitle" name="pictureTitle" class="pictureTitle" required>
+
+                <label for="categoryName" class="titleFormLabel">Catégorie</label>
+                <select id="categoryName" name="categoryName" class="categoryName" required>
+                    <option class="blankChoiceCategory"></option>
+                </select>
+                <hr class="formLine">
+                <button type="submit" class="submitBtn">Valider</button>
             </form>
         </div>
     `;
+
+    // Appelle la fonction pour ajouter les options de catégories
+    categoriesOptions(secondModal.querySelector('.formModal'));
 
     // Récupère le bouton pour fermer la deuxième modal
     const closeSecondModalButton = secondModal.querySelector('.close-modal');
@@ -163,13 +158,12 @@ function openSecondModal() {
     const modal2BackButton = secondModal.querySelector('.js-modal2-back');
 
     // Récupère le champ de sélection de l'image
-    const fileInput = secondModal.querySelector('#id-input');
+    const fileInput = secondModal.querySelector('#addPictureFile');
 
     // Ajoute un événement au changement de la sélection de fichier
     fileInput.addEventListener('change', showPreview);
 
-    // Récupère le bouton "Submit" par son id
-    const submitButton = secondModal.querySelector('#submit-btn');
+   
 
     // Événement au clic sur la croix pour fermer la deuxième modal
     closeSecondModalButton.addEventListener('click', () => {
@@ -183,16 +177,48 @@ function openSecondModal() {
         loadImages(); // Charge à nouveau les images si nécessaire
     });
 
-    // Ajoute un événement au clic sur le bouton "Submit"
-    submitButton.addEventListener('click', (event) => {
-        event.preventDefault(); // Empêche le comportement par défaut du formulaire
+     // Récupère le bouton "Submit" par son id
+const submitButton = secondModal.querySelector('.submitBtn');
 
-        // Ici, tu peux ajouter le code pour traiter les données du formulaire
-        // Par exemple, récupérer les valeurs des champs et effectuer une action en conséquence
+// Événement au clic sur le bouton "Submit" dans la deuxième modal
+submitButton.addEventListener('click', async (event) => {
+    event.preventDefault(); // Empêche le comportement par défaut du formulaire
 
-        // Une fois le traitement effectué, tu peux fermer la deuxième modal
-        document.body.removeChild(secondModal);
-    });
+    // Récupère les valeurs des champs du formulaire
+    const title = secondModal.querySelector('#pictureTitle').value;
+    const category = secondModal.querySelector('#categoryName').value;
+    const image = secondModal.querySelector('#addPictureFile').files[0];
+
+    // Crée un objet FormData
+    const formData = new FormData();
+    formData.append('title', title); 
+    formData.append('category', category); 
+    formData.append('image', image);
+
+    // Vérifie que tous les champs nécessaires sont remplis
+    if (title && category && image) {
+        try {
+            // Supprime la classe "btnDisabled" du bouton
+            submitButton.classList.remove('btnDisabled');
+            // Appelle la fonction pour ajouter la photo en utilisant postRequest
+            const response = await postRequest('http://localhost:5678/api/works', formData);
+
+            console.log('Photo ajoutée avec succès:', response);
+
+            // Ferme la deuxième modal après l'ajout de la photo
+            document.body.removeChild(secondModal);
+
+            // Recharge les images dans la première modal
+            loadImages();
+        } catch (error) {
+            console.error('Erreur lors de l\'ajout de la photo:', error);
+            window.alert('Erreur lors de l\'ajout de la photo');
+        }
+    } else {
+        window.alert('Veuillez remplir tous les champs obligatoires.');
+    }
+});
+
 
     // Ajoute la deuxième modal au body
     document.body.appendChild(secondModal);
@@ -215,32 +241,18 @@ function deleteImage(id) {
         })
         .catch(error => console.error('Erreur lors de la suppression de l\'image:', error));
 }
-// Ajoute une fonction pour envoyer une nouvelle œuvre en utilisant la méthode POST
-function addPhoto(title, category, image) {
-    const formData = new FormData();
-    formData.append('image', image);
-    formData.append('titre', title);
-    formData.append('catégorie', category);
 
-    postRequest("http://localhost:5678/api/works", formData)
-        .then(response => {
-            console.log('Photo ajoutée avec succès:', response);
-            closeModal(); // Ferme la première modal après l'ajout de la photo
-            loadImages(); // Charge à nouveau les images si nécessaire
-        })
-        .catch(error => console.error('Erreur lors de l\'ajout de la photo:', error));
-}
-
-
-// Événement au clic sur le bouton "Submit" dans la deuxième modal
-submitButton.addEventListener('click', (event) => {
-    event.preventDefault(); // Empêche le comportement par défaut du formulaire
-
-    // Récupère les valeurs des champs du formulaire
-    const title = secondModal.querySelector('#titre').value;
-    const category = secondModal.querySelector('#categorie').value;
-    const image = secondModal.querySelector('#id-input').files[0];
-
-    // Appelle la fonction pour ajouter la photo
-    addPhoto(title, category, image);
-});
+// Fonction pour ajouter les options de catégories au formulaire d'ajout d'image
+function categoriesOptions(modalAddPictureForm) {
+    fetch("http://localhost:5678/api/categories")
+        .then(data => data.json())
+        .then(categories => {
+            categories.forEach((category) => {
+                const categoryChoice = document.createElement("option");
+                categoryChoice.classList.add("categoryChoice");
+                categoryChoice.setAttribute("value", category.id);
+                categoryChoice.innerText = category.name;
+                modalAddPictureForm.querySelector(".categoryName").appendChild(categoryChoice);
+            });
+        });
+};
