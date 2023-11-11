@@ -2,32 +2,30 @@
 import { getRequest, postRequest, deleteRequest } from './request.js';
 
 function showPreview(event) {
-    console.log('Files:', this.files);
+   
 
-    const blocToAddPicture = document.querySelector(".blocToAddPicture");
-    blocToAddPicture.innerHTML = "";
+    
+
 
     if (this.files.length > 0) {
+       const oLdBlockElements=document.querySelectorAll(".blocToAddPicture *")
+       oLdBlockElements.forEach(element=>{
+        element.style.display="none"
+       })
+
         const image = this.files[0];
 
-        blocToAddPicture.innerHTML = /* html */
-            `<label for="addPictureFile" class="labelPicturePreview">
-                <img class="formPicturePreview">
-            </label>
-            <input id="addPictureFile" type="file" name="addPictureFile" class="pictureBtnHidden addFile" accept=".jpg, .png">
-        `;
+        const blocToAddPicture = document.querySelector(".blocToAddPicture");
+        const imagePreview = document.createElement("img")
+        imagePreview.classList.add("formPicturePreview")
+        imagePreview.src = URL.createObjectURL(image);
+        imagePreview.alt = pictureTitle.value;
+        blocToAddPicture.appendChild(imagePreview)
 
-        const formPicturePreview = /** @type {HTMLImageElement} */ (document.querySelector(".formPicturePreview"));
-        formPicturePreview.src = URL.createObjectURL(image);
-
-        const pictureTitle = /** @type {HTMLInputElement} */ (document.querySelector(".pictureTitle"));
-        formPicturePreview.alt = pictureTitle.value;
 
         const addFile = document.querySelector(".addFile");
         addFile.addEventListener("change", showPreview);
-
-        // Ajoute un console.log pour afficher des informations dans la console
-        console.log('Fichier sélectionné :', image);
+    
     } else {
         console.log('Aucun fichier sélectionné.');
     }
@@ -210,16 +208,14 @@ submitButton.addEventListener('click', function(event) {
     formData.append('category', category); 
     formData.append('image', image);
 
-    console.log('Title :', title);
-    console.log('Catégory :', category);
-    console.log('Image :', image);
+    console.log(formData)
 
     // Vérifie que tous les champs nécessaires sont remplis
     if (title && category && image) {
         
 
         // Appelle la fonction pour ajouter la photo en utilisant postRequest
-        postRequest('http://localhost:5678/api/works', formData, { Authorization: `Bearer ${token}` })
+        postRequest('http://localhost:5678/api/works', formData)
             .then(function(response) {
                 console.log('Photo ajoutée avec succès:', response);
 
