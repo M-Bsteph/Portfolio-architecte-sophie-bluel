@@ -60,36 +60,3 @@ export function deleteRequest(url) {
         .catch((error) => console.error("Error:", error));
 }
 
-// Fonction pour ajouter une photo
-export function addPhoto(title, category, image) {
-    const formData = new FormData();
-    formData.append('titre', title);
-    formData.append('categorie', category);
-    formData.append('image', image);
-
-    console.log("Token avant l'appel fetch:", token);
-    console.log("Données à envoyer:", formData);
-
-
-    return fetch('http://localhost:5678/api/works', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            "Authorization": `Bearer ${token}`,
-        },
-        body: formData,
-    })
-    .then(response => {
-        if (!response.ok) {
-            console.error('Erreur lors de la requête. Statut:', response.status);
-            console.error('Réponse serveur:', response.statusText); // Ajout de cette ligne
-            throw new Error('Erreur lors de l\'ajout de la photo');
-        }
-        return response.json();
-    })
-    
-        .catch(error => {
-            console.error('Erreur lors de l\'ajout de la photo:', error);
-            throw error;
-        });
-}

@@ -1,27 +1,38 @@
 // Importe les fonctions getRequest, postRequest et deleteRequest depuis le fichier request.js
 import { getRequest, postRequest, deleteRequest } from './request.js';
 
-// Fonction pour afficher un aperçu de l'image sélectionnée
 function showPreview(event) {
+    console.log('Files:', this.files);
+
     const blocToAddPicture = document.querySelector(".blocToAddPicture");
     blocToAddPicture.innerHTML = "";
 
-    blocToAddPicture.innerHTML = /* html */
-        `<label for="addPictureFile" class="labelPicturePreview">
-        <img class="formPicturePreview">
-    </label>
-    <input id="addPictureFile" type="file" name="addPictureFile" class="pictureBtnHidden addFile" accept=".jpg, .png">
-    `;
+    if (this.files.length > 0) {
+        const image = this.files[0];
 
-    const formPicturePreview = /** @type {HTMLImageElement} */ (document.querySelector(".formPicturePreview"));
-    formPicturePreview.src = URL.createObjectURL(this.files[0]);
+        blocToAddPicture.innerHTML = /* html */
+            `<label for="addPictureFile" class="labelPicturePreview">
+                <img class="formPicturePreview">
+            </label>
+            <input id="addPictureFile" type="file" name="addPictureFile" class="pictureBtnHidden addFile" accept=".jpg, .png">
+        `;
 
-    const pictureTitle = /** @type {HTMLInputElement} */ (document.querySelector(".pictureTitle"));
-    formPicturePreview.alt = pictureTitle.value;
+        const formPicturePreview = /** @type {HTMLImageElement} */ (document.querySelector(".formPicturePreview"));
+        formPicturePreview.src = URL.createObjectURL(image);
 
-    const addFile = document.querySelector(".addFile");
-    addFile.addEventListener("change", showPreview);
+        const pictureTitle = /** @type {HTMLInputElement} */ (document.querySelector(".pictureTitle"));
+        formPicturePreview.alt = pictureTitle.value;
+
+        const addFile = document.querySelector(".addFile");
+        addFile.addEventListener("change", showPreview);
+
+        // Ajoute un console.log pour afficher des informations dans la console
+        console.log('Fichier sélectionné :', image);
+    } else {
+        console.log('Aucun fichier sélectionné.');
+    }
 }
+
 
 // Récupère le bouton "Modifier" et la première modal
 const openModalButton = document.getElementById('open-modal');
@@ -128,7 +139,7 @@ function openSecondModal() {
             <button class="js-modal2-back"><i class="fa-solid fa-arrow-left"></i></button>
             <h2>Ajouter une photo</h2>
 
-            <form class="formModal" enctype="multipart/form-data">
+            <form class="formModal" enctype="multipart/form-data" method="post" >
                 <div class="blocToAddPicture">
                     <i class="fa-regular fa-image iconeFormPicture"></i>
                     <label for="addPictureFile" class="addPictureBtn">+ Ajouter une photo</label>
@@ -159,12 +170,13 @@ function openSecondModal() {
 
     // Récupère le champ de sélection de l'image
     const fileInput = secondModal.querySelector('#addPictureFile');
+     // Ajoute un événement au changement de la sélection de fichier
+     fileInput.addEventListener('change', showPreview);
 
     // Ajoute un événement au changement de la sélection de fichier
     fileInput.addEventListener('change', showPreview);
 
-   
-
+  
     // Événement au clic sur la croix pour fermer la deuxième modal
     closeSecondModalButton.addEventListener('click', () => {
         document.body.removeChild(secondModal);
@@ -177,11 +189,14 @@ function openSecondModal() {
         loadImages(); // Charge à nouveau les images si nécessaire
     });
 
+
+
      // Récupère le bouton "Submit" par son id
 const submitButton = secondModal.querySelector('.submitBtn');
 
+
 // Événement au clic sur le bouton "Submit" dans la deuxième modal
-submitButton.addEventListener('click', async (event) => {
+submitButton.addEventListener('click', function(event) {
     event.preventDefault(); // Empêche le comportement par défaut du formulaire
 
     // Récupère les valeurs des champs du formulaire
@@ -195,30 +210,33 @@ submitButton.addEventListener('click', async (event) => {
     formData.append('category', category); 
     formData.append('image', image);
 
+    console.log('Title :', title);
+    console.log('Catégory :', category);
+    console.log('Image :', image);
+
     // Vérifie que tous les champs nécessaires sont remplis
     if (title && category && image) {
-        try {
-            // Supprime la classe "btnDisabled" du bouton
-            submitButton.classList.remove('btnDisabled');
-            // Appelle la fonction pour ajouter la photo en utilisant postRequest
-            const response = await postRequest('http://localhost:5678/api/works', formData);
+        
 
-            console.log('Photo ajoutée avec succès:', response);
+        // Appelle la fonction pour ajouter la photo en utilisant postRequest
+        postRequest('http://localhost:5678/api/works', formData, { Authorization: `Bearer ${token}` })
+            .then(function(response) {
+                console.log('Photo ajoutée avec succès:', response);
 
-            // Ferme la deuxième modal après l'ajout de la photo
-            document.body.removeChild(secondModal);
+                // Ferme la deuxième modal après l'ajout de la photo
+                document.body.removeChild(secondModal);
 
-            // Recharge les images dans la première modal
-            loadImages();
-        } catch (error) {
-            console.error('Erreur lors de l\'ajout de la photo:', error);
-            window.alert('Erreur lors de l\'ajout de la photo');
-        }
+                // Recharge les images dans la première modal
+                loadImages();
+            })
+            .catch(function(error) {
+                console.error('Erreur lors de l\'ajout de la photo:', error);
+                window.alert('Erreur lors de l\'ajout de la photo');
+            });
     } else {
         window.alert('Veuillez remplir tous les champs obligatoires.');
     }
 });
-
 
     // Ajoute la deuxième modal au body
     document.body.appendChild(secondModal);
