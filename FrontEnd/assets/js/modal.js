@@ -1,16 +1,9 @@
-import {
-  getWorksGallery,
-  deletePicture,
-  addNewPicture,
-  getCategories,
-} from './request.js';
-
+document.addEventListener("DOMContentLoaded", function () {});
 const modal = document.querySelector(".modal");
 const modifyBtn = document.querySelector(".modifyBtn");
 const token = localStorage.getItem("token");
 
 modifyBtn.addEventListener("click", generateModalGallery);
-
 function generateModalGallery(event) {
   event.preventDefault();
   modal.innerHTML = "";
@@ -19,7 +12,6 @@ function generateModalGallery(event) {
   modal.ariaModal = "true";
   modalGalleryElements();
 }
-
 function modalGalleryElements() {
   modal.addEventListener("click", closeModal);
 
@@ -28,12 +20,13 @@ function modalGalleryElements() {
   modalGallery.setAttribute("id", "modalGallery");
   modalGallery.addEventListener("click", stopPropagation);
 
-  modalGallery.innerHTML = /* html */ `
-    <i class="fa-solid fa-xmark fa-xl closeModal"></i>
-    <h3 class="modalTitle">Galerie photo</h3>
-    <div class="miniGallery"></div>
-    <hr>
-    <button class="addPictureButton">Ajouter une photo</button>`;
+  modalGallery.innerHTML =
+    /* html */
+    `<i class="fa-solid fa-xmark fa-xl closeModal"></i>
+        <h3 class="modalTitle">Galerie photo</h3>
+        <div class="miniGallery"></div>
+        <hr>
+        <button class="addPictureButton">Ajouter une photo</button>`;
 
   modalGallery
     .querySelector(".closeModal")
@@ -45,9 +38,9 @@ function modalGalleryElements() {
   modal.appendChild(modalGallery);
   retrieveModalGallery();
 }
-
 function retrieveModalGallery() {
-  getWorksGallery()
+  fetch("http://localhost:5678/api/works")
+    .then((data) => data.json())
     .then((worksGallery) => {
       const gallery = document.querySelector(".miniGallery");
       gallery.innerHTML = "";
@@ -56,37 +49,24 @@ function retrieveModalGallery() {
         figureModal.classList.add("figureModal");
         figureModal.setAttribute("data-id", worksGallery[i].id);
 
-        figureModal.innerHTML = /* html */ `
-          <img class="miniPictureGallery" src=${worksGallery[i].imageUrl} alt=${worksGallery[i].title}>
-          <span class="deletePictureBtn">
-            <i class="fa-solid fa-trash-can fa-xs"></i>
-          </span>`;
+        figureModal.innerHTML =
+          /* html */
+          `<img class="miniPictureGallery" src=${worksGallery[i].imageUrl} alt=${worksGallery[i].title}>
+                    <span class="deletePictureBtn">
+                        <i class="fa-solid fa-trash-can fa-xs"></i>
+                    </span>`;
 
         figureModal
           .querySelector(".deletePictureBtn")
           .addEventListener("click", function (event) {
             event.preventDefault();
-            deletePicture(figureModal.dataset.id, token)
-              .then((Response) => {
-                if (Response.ok) {
-                  retrieveModalGallery();
-                  mainGallery();
-                } else {
-                  window.alert("Une erreur s'est produite, le projet n'a pas été supprimé");
-                }
-              });
+            deletePicture(figureModal);
           });
 
         gallery.appendChild(figureModal);
       }
-    })
-    .catch((error) => {
-      console.error('Error retrieving works gallery:', error);
     });
 }
-
-// ... (continue with the rest of your code)
-
 function deletePicture(figureModal) {
   const projectId = figureModal.dataset.id;
   fetch("http://localhost:5678/api/works/" + projectId, {
