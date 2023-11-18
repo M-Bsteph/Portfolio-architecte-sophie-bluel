@@ -1,81 +1,77 @@
-
-// Importe les fonctions depuis request.js
-import { getRequest} from './request.js';
-
-document.addEventListener('DOMContentLoaded', function () {
-  // Variables
-  let isConnect = localStorage.getItem("tokenIdentification") !== null;
-  const filterSection = document.querySelector(".filters");
-  const gallery = document.querySelector(".gallery");
-
-  // Écouteurs d'événements
-  const btnFilterAll = createButton("Tous", "all", "active");
-  filterSection.appendChild(btnFilterAll);
-  btnFilterAll.addEventListener("click", () => handleFilterClick("all"));
-
-  // Fonctions
-
-  // Fonction pour créer un bouton
-  function createButton(text, value, className) {
-    const button = document.createElement("button");
-    button.innerText = text;
-    button.value = value;
-    button.classList = className;
-    return button;
-  }
-
-  // Fonction pour gérer le clic sur un filtre
-  function handleFilterClick(filterValue) {
-    const filters = document.querySelectorAll(".filters button");
-    filters.forEach((filter) => filter.classList.remove("active"));
-    event.target.classList.add("active");
-
-    gallery.innerHTML = "";
-
-    // Utilise loadWorks ici
-    getRequest("http://localhost:5678/api/works").then((works) => {
-      for (const id in works) {
-        const work = works[id];
-        if (filterValue == "all" || work.category.id == filterValue) {
-          const figElement = createFigure(work);
-          gallery.appendChild(figElement);
-        }
-      }
-    });
-  }
-
-  // Fonction pour créer un élément de figure (représentant une œuvre)
-  function createFigure(work) {
-    const figElement = document.createElement("figure");
-    figElement.id = `work-${work.id}`;
-
-    const imgElement = document.createElement("img");
-    imgElement.src = work.imageUrl;
-    imgElement.alt = work.title;
-
-    const figCaptionElement = document.createElement("figcaption");
-    figCaptionElement.textContent = work.title;
-
-    figElement.appendChild(imgElement);
-    figElement.appendChild(figCaptionElement);
-
-    return figElement;
-  }
-
-  // Fonction pour créer des boutons de catégorie
-  function createCategoryButtons(categories) {
-    categories.forEach((category) => {
-      const button = createButton(category.name, category.id, "");
-      button.addEventListener("click", () => handleFilterClick(category.id));
-      filterSection.appendChild(button);
-    });
-  }
-
-  // Initialisation
-
-  // Charger les catégories et créer les boutons correspondants
- getRequest("http://localhost:5678/api/categories").then((categories) => createCategoryButtons(categories));
-
-  // Charger les œuvres et créer les éléments de figure correspondants dans la galerie
-  getRequest("http://localhost:5678/api/works").then((works) => works.forEach((work) => gallery.appendChild(createFigure(work))));
+document.addEventListener("DOMContentLoaded", function() {
+   
+    mainGallery();
 });
+
+function filters() {
+    fetch("http://localhost:5678/api/categories")
+        .then(data => data.json())
+        .then(categories => {
+            const filters = document.querySelector(".filters");
+            const btnAll = document.createElement("button");
+            btnAll.classList.add("filtersBtn", "filtersBtnSelected");
+            btnAll.innerText = "Tous";
+            btnAll.setAttribute("data-id", "0");
+            filters.appendChild(btnAll);
+
+            categories.forEach((category) => {
+                const btnCategory = document.createElement("button");
+                btnCategory.classList.add("filtersBtn");
+                btnCategory.setAttribute("data-id", category.id);
+                btnCategory.innerText = category.name;
+                filters.appendChild(btnCategory)
+            })
+
+            buttonSelected();
+        })
+        .catch(error => {
+            console.error("Un problème est survenu lors de la récupération des données:", error);
+        });
+}
+function mainGallery() {
+    fetch("http://localhost:5678/api/works")
+        .then(data => data.json())
+        .then(works => {
+            const gallery = document.querySelector(".gallery");
+            gallery.innerHTML = "";
+            for (let i = 0; i < works.length; i++) {
+                const figure = document.createElement("figure");
+                figure.setAttribute("data-id", works[i].categoryId);
+
+                const image = document.createElement("img");
+                image.src = works[i].imageUrl;
+                image.alt = works[i].title;
+
+                const figCaption = document.createElement("figcaption");
+                figCaption.innerText = works[i].title;
+
+                figure.appendChild(image);
+                figure.appendChild(figCaption);
+                gallery.appendChild(figure);
+            }
+        })
+        .catch(error => {
+            console.error("Un problème est survenu lors de la récupération des données:", error);
+        });
+}
+
+function buttonSelected() {
+    const allBtn = document.querySelectorAll("button");
+    allBtn.forEach((buttons) => {
+        buttons.addEventListener("click", function () {
+
+            const btnDisabled = document.querySelector(".filtersBtnSelected");
+            btnDisabled.classList.remove("filtersBtnSelected");
+            buttons.classList.add("filtersBtnSelected");
+
+            const allFigures = document.querySelectorAll("figure");
+            allFigures.forEach((figure) => {
+                if (figure.dataset.id === buttons.dataset.id || buttons.dataset.id === "0" || figure.dataset.id === "0") {
+                    figure.style.display = "block";
+                } else {
+                    figure.style.display = "none";
+                }
+            });
+        });
+    });
+}

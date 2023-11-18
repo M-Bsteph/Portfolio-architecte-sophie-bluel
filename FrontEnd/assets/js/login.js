@@ -1,31 +1,37 @@
-import { loginRequest } from './request.js';
+function logIn() {
+    const loginForm = document.querySelector("form");
 
+    loginForm.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-let formulaire = document.getElementById("form");
-formulaire.addEventListener("submit", (event) => {
-    // Empêcher le comportement par défaut du formulaire
-    event.preventDefault();
+        const emailValue = document.getElementById("email").value;
+        const passwordValue = document.getElementById("password").value;
+        const errorMessage = document.querySelector(".errorMessage");
 
-    // Récupérer les valeurs de l'identifiant et du mot de passe
-    let user = document.getElementById("e-mail").value;
-    let password = document.getElementById("mot-de-passe").value;
+        const userIdentifier = {
+            email: emailValue,
+            password: passwordValue,
+        };
 
-    // Utiliser la fonction d'authentification
-    loginRequest(user, password)
-        .then((data) => {
-            console.log(data);
-
-            if (data.token != null) {
-                // Stocker le token dans le stockage local
-                localStorage.setItem("tokenIdentification", data.token);
-                // Rediriger vers la page autorisée
-                window.location.href = "http://127.0.0.1:5500";
-            } else {
-                // Afficher une alerte en cas d'identifiant ou de mot de passe incorrect
-                alert("Identifiant ou mot de passe incorrect");
-            }
+        fetch("http://localhost:5678/api/users/login", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userIdentifier)
         })
-        .catch((error) => {
-            console.error("Erreur lors de la requête d'authentification", error);
+        .then(response => response.json())
+        .then(identifiers => {
+            if (identifiers.token) {
+                localStorage.setItem("token", identifiers.token);
+                window.location.href = "./index.html";
+            } else {
+                errorMessage.textContent = "Erreur dans l'identifiant ou le mot de passe";
+                errorMessage.classList.add("error");
+            }
         });
-});
+    });
+}
+
+logIn();
