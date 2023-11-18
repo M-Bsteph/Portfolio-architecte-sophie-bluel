@@ -1,95 +1,120 @@
-document.addEventListener("DOMContentLoaded", function() {
-   
-    // Autres initialisations si nécessaire
-});
+import {
+  getWorksGallery,
+  deletePicture,
+  addNewPicture,
+  getCategories,
+} from './request.js';
+
 const modal = document.querySelector(".modal");
 const modifyBtn = document.querySelector(".modifyBtn");
 const token = localStorage.getItem("token");
 
 modifyBtn.addEventListener("click", generateModalGallery);
+
 function generateModalGallery(event) {
-    event.preventDefault();
-    modal.innerHTML = "";
-    modal.style.display = "flex";
-    modal.removeAttribute("aria-hidden");
-    modal.ariaModal = "true";
-    modalGalleryElements();
+  event.preventDefault();
+  modal.innerHTML = "";
+  modal.style.display = "flex";
+  modal.removeAttribute("aria-hidden");
+  modal.ariaModal = "true";
+  modalGalleryElements();
 }
+
 function modalGalleryElements() {
-    modal.addEventListener("click", closeModal);
+  modal.addEventListener("click", closeModal);
 
-    const modalGallery = document.createElement("div");
-    modalGallery.classList.add("modalGallery");
-    modalGallery.setAttribute("id", "modalGallery");
-    modalGallery.addEventListener("click", stopPropagation);
+  const modalGallery = document.createElement("div");
+  modalGallery.classList.add("modalGallery");
+  modalGallery.setAttribute("id", "modalGallery");
+  modalGallery.addEventListener("click", stopPropagation);
 
-    modalGallery.innerHTML = /* html */
-        `<i class="fa-solid fa-xmark fa-xl closeModal"></i>
-        <h3 class="modalTitle">Galerie photo</h3>
-        <div class="miniGallery"></div>
-        <hr>
-        <button class="addPictureButton">Ajouter une photo</button>`;
+  modalGallery.innerHTML = /* html */ `
+    <i class="fa-solid fa-xmark fa-xl closeModal"></i>
+    <h3 class="modalTitle">Galerie photo</h3>
+    <div class="miniGallery"></div>
+    <hr>
+    <button class="addPictureButton">Ajouter une photo</button>`;
 
-    modalGallery.querySelector(".closeModal").addEventListener("click", closeModal);
-    modalGallery.querySelector(".addPictureButton").addEventListener("click", modalAddPicture);
+  modalGallery
+    .querySelector(".closeModal")
+    .addEventListener("click", closeModal);
+  modalGallery
+    .querySelector(".addPictureButton")
+    .addEventListener("click", modalAddPicture);
 
-    modal.appendChild(modalGallery);
-    recuperationModalGallery();
+  modal.appendChild(modalGallery);
+  retrieveModalGallery();
 }
-function recuperationModalGallery() {
-    fetch("http://localhost:5678/api/works")
-        .then(data => data.json())
-        .then(worksGallery => {
-            const gallery = document.querySelector(".miniGallery");
-            gallery.innerHTML = "";
-            for (let i = 0; i < worksGallery.length; i++) {
-                const figureModal = document.createElement("figure");
-                figureModal.classList.add("figureModal")
-                figureModal.setAttribute("data-id", worksGallery[i].id);
 
-                figureModal.innerHTML = /* html */
-                    `<img class="miniPictureGallery" src=${worksGallery[i].imageUrl} alt=${worksGallery[i].title}>
-                    <span class="deletePictureBtn">
-                        <i class="fa-solid fa-trash-can fa-xs"></i>
-                    </span>`;
+function retrieveModalGallery() {
+  getWorksGallery()
+    .then((worksGallery) => {
+      const gallery = document.querySelector(".miniGallery");
+      gallery.innerHTML = "";
+      for (let i = 0; i < worksGallery.length; i++) {
+        const figureModal = document.createElement("figure");
+        figureModal.classList.add("figureModal");
+        figureModal.setAttribute("data-id", worksGallery[i].id);
 
-                figureModal.querySelector(".deletePictureBtn").addEventListener("click", function (event) {
-                    event.preventDefault();
-                    deletePicture(figureModal);
-                });
+        figureModal.innerHTML = /* html */ `
+          <img class="miniPictureGallery" src=${worksGallery[i].imageUrl} alt=${worksGallery[i].title}>
+          <span class="deletePictureBtn">
+            <i class="fa-solid fa-trash-can fa-xs"></i>
+          </span>`;
 
-                gallery.appendChild(figureModal);
-            }
-        });
-}
-function deletePicture(figureModal) {
-    const projectId = figureModal.dataset.id;
-    fetch("http://localhost:5678/api/works/" + projectId, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "*/*",
-            "Authorization": `Bearer ${token}`,
-        },
+        figureModal
+          .querySelector(".deletePictureBtn")
+          .addEventListener("click", function (event) {
+            event.preventDefault();
+            deletePicture(figureModal.dataset.id, token)
+              .then((Response) => {
+                if (Response.ok) {
+                  retrieveModalGallery();
+                  mainGallery();
+                } else {
+                  window.alert("Une erreur s'est produite, le projet n'a pas été supprimé");
+                }
+              });
+          });
+
+        gallery.appendChild(figureModal);
+      }
     })
-        .then(Response => {
-            if (Response.ok) {
-                recuperationModalGallery();
-                mainGallery();
-            } else {
-                window.alert("Une erreur s'est produite, le projet n'a pas été supprimé")
-            }
-        });
+    .catch((error) => {
+      console.error('Error retrieving works gallery:', error);
+    });
+}
+
+// ... (continue with the rest of your code)
+
+function deletePicture(figureModal) {
+  const projectId = figureModal.dataset.id;
+  fetch("http://localhost:5678/api/works/" + projectId, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "*/*",
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((Response) => {
+    if (Response.ok) {
+      retrieveModalGallery();
+      mainGallery();
+    } else {
+      window.alert("Une erreur s'est produite, le projet n'a pas été supprimé");
+    }
+  });
 }
 function modalAddPicture(event) {
-    event.preventDefault();
-    modal.innerHTML = "";
+  event.preventDefault();
+  modal.innerHTML = "";
 
-    const modalAddPictureForm = document.createElement("div");
-    modalAddPictureForm.classList.add("modalAddPictureForm");
-    modalAddPictureForm.addEventListener("click", stopPropagation);
-    modalAddPictureForm.innerHTML = /* html */
-        `<i class="fa-solid fa-arrow-left fa-xl previousModal"></i>
+  const modalAddPictureForm = document.createElement("div");
+  modalAddPictureForm.classList.add("modalAddPictureForm");
+  modalAddPictureForm.addEventListener("click", stopPropagation);
+  modalAddPictureForm.innerHTML =
+    /* html */
+    `<i class="fa-solid fa-arrow-left fa-xl previousModal"></i>
         <i class="fa-solid fa-xmark fa-xl closeModal"></i>
         <h3 class="modalTitle">Ajout photo</h3>
         <form class="formModal">
@@ -109,104 +134,130 @@ function modalAddPicture(event) {
             <button type="submit" class="submitBtn btnDisabled">Valider</button>
         </form>`;
 
-    modalAddPictureForm.querySelector(".previousModal").addEventListener("click", generateModalGallery);
-    modalAddPictureForm.querySelector(".closeModal").addEventListener("click", closeModal);
-    modalAddPictureForm.querySelector(".addFile").addEventListener("change", picturePreview);
+  modalAddPictureForm
+    .querySelector(".previousModal")
+    .addEventListener("click", generateModalGallery);
+  modalAddPictureForm
+    .querySelector(".closeModal")
+    .addEventListener("click", closeModal);
+  modalAddPictureForm
+    .querySelector(".addFile")
+    .addEventListener("change", picturePreview);
 
-    categoriesOptions(modalAddPictureForm);
+  categoriesOptions(modalAddPictureForm);
 
-    const formModal = modalAddPictureForm.querySelector(".formModal");
-    const pictureTitle = modalAddPictureForm.querySelector(".pictureTitle");
-    const addFile = modalAddPictureForm.querySelector(".addFile");
-    const categoryName = modalAddPictureForm.querySelector(".categoryName");
-    const submitForm = modalAddPictureForm.querySelector(".submitBtn");
+  const formModal = modalAddPictureForm.querySelector(".formModal");
+  const pictureTitle = modalAddPictureForm.querySelector(".pictureTitle");
+  const addFile = modalAddPictureForm.querySelector(".addFile");
+  const categoryName = modalAddPictureForm.querySelector(".categoryName");
+  const submitForm = modalAddPictureForm.querySelector(".submitBtn");
 
-    verifyInputForm({ formModal, addFile, pictureTitle, categoryName, submitForm });
-    sendNewProject({ formModal, pictureTitle, addFile, categoryName });
+  verifyInputForm({
+    formModal,
+    addFile,
+    pictureTitle,
+    categoryName,
+    submitForm,
+  });
+  sendNewProject({ formModal, pictureTitle, addFile, categoryName });
 
-    modal.appendChild(modalAddPictureForm);
+  modal.appendChild(modalAddPictureForm);
 }
 
 function picturePreview() {
-    const blocToAddPicture = document.querySelector(".blocToAddPicture");
-    blocToAddPicture.innerHTML = "";
+  const blocToAddPicture = document.querySelector(".blocToAddPicture");
+  blocToAddPicture.innerHTML = "";
 
-    blocToAddPicture.innerHTML = /* html */
-        `<label for="addPictureFile" class="labelPicturePreview">
+  blocToAddPicture.innerHTML =
+    /* html */
+    `<label for="addPictureFile" class="labelPicturePreview">
             <img class="formPicturePreview">
         </label>
         <input id="addPictureFile" type="file" name="addPictureFile" class="pictureBtnHidden addFile" accept=".jpg, .png">`;
 
-    const formPicturePreview = document.querySelector(".formPicturePreview");
-    formPicturePreview.src = URL.createObjectURL(this.files[0]);
+  const formPicturePreview = document.querySelector(".formPicturePreview");
+  formPicturePreview.src = URL.createObjectURL(this.files[0]);
 
-    const pictureTitle = document.querySelector(".pictureTitle");
-    formPicturePreview.alt = pictureTitle.value;
+  const pictureTitle = document.querySelector(".pictureTitle");
+  formPicturePreview.alt = pictureTitle.value;
 
-    const addFile = document.querySelector(".addFile");
-    addFile.addEventListener("change", picturePreview);
+  const addFile = document.querySelector(".addFile");
+  addFile.addEventListener("change", picturePreview);
 }
-function verifyInputForm({ formModal, addFile, pictureTitle, categoryName, submitForm }) {
-    formModal.addEventListener("change", function () {
-        if (addFile.files[0] && pictureTitle.value != "" && categoryName.value != "") {
-            submitForm.classList.remove("btnDisabled");
-        } else {
-            submitForm.classList.add("btnDisabled");
-        }
-    });
+function verifyInputForm({
+  formModal,
+  addFile,
+  pictureTitle,
+  categoryName,
+  submitForm,
+}) {
+  formModal.addEventListener("change", function () {
+    if (
+      addFile.files[0] &&
+      pictureTitle.value != "" &&
+      categoryName.value != ""
+    ) {
+      submitForm.classList.remove("btnDisabled");
+    } else {
+      submitForm.classList.add("btnDisabled");
+    }
+  });
 }
 
 function sendNewProject({ formModal, pictureTitle, addFile, categoryName }) {
-    formModal.addEventListener("submit", function (event) {
-        event.preventDefault();
+  formModal.addEventListener("submit", function (event) {
+    event.preventDefault();
 
-        const formData = new FormData();
-        formData.append("title", pictureTitle.value);
-        formData.append("image", addFile.files[0]);
-        formData.append("category", categoryName.value);
+    const formData = new FormData();
+    formData.append("title", pictureTitle.value);
+    formData.append("image", addFile.files[0]);
+    formData.append("category", categoryName.value);
 
-        fetch("http://localhost:5678/api/works", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Accept": "application/json",
-            },
-            body: formData,
-        })
-            .then(Response => {
-                if (Response.ok) {
-                    Response.json();
-                    mainGallery();
-                    modal.innerHTML = "";
-                    modalGalleryElements();
-                } else {
-                    window.alert("Un problème est survenu, l'image n'a pas pu être ajoutée");
-                }
-            });
+    fetch("http://localhost:5678/api/works", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      body: formData,
+    }).then((Response) => {
+      if (Response.ok) {
+        Response.json();
+        mainGallery();
+        modal.innerHTML = "";
+        modalGalleryElements();
+      } else {
+        window.alert(
+          "Un problème est survenu, l'image n'a pas pu être ajoutée"
+        );
+      }
     });
+  });
 }
 function categoriesOptions(modalAddPictureForm) {
-    fetch("http://localhost:5678/api/categories")
-        .then(data => data.json())
-        .then(categories => {
-            categories.forEach((category) => {
-                const categoryChoice = document.createElement("option");
-                categoryChoice.classList.add("categoryChoice");
-                categoryChoice.setAttribute("value", category.id);
-                categoryChoice.innerText = category.name;
-                modalAddPictureForm.querySelector(".categoryName").appendChild(categoryChoice);
-            });
-        });
+  fetch("http://localhost:5678/api/categories")
+    .then((data) => data.json())
+    .then((categories) => {
+      categories.forEach((category) => {
+        const categoryChoice = document.createElement("option");
+        categoryChoice.classList.add("categoryChoice");
+        categoryChoice.setAttribute("value", category.id);
+        categoryChoice.innerText = category.name;
+        modalAddPictureForm
+          .querySelector(".categoryName")
+          .appendChild(categoryChoice);
+      });
+    });
 }
 function closeModal(event) {
-    event.preventDefault();
-    modal.style.display = "none";
-    modal.ariaHidden = "true";
-    modal.removeAttribute("aria-modal");
-    modal.removeEventListener("click", closeModal);
-    modal.querySelector(".closeModal").removeEventListener("click", closeModal);
+  event.preventDefault();
+  modal.style.display = "none";
+  modal.ariaHidden = "true";
+  modal.removeAttribute("aria-modal");
+  modal.removeEventListener("click", closeModal);
+  modal.querySelector(".closeModal").removeEventListener("click", closeModal);
 }
 
 function stopPropagation(event) {
-    event.stopPropagation();
+  event.stopPropagation();
 }
