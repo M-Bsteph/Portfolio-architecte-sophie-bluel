@@ -156,7 +156,9 @@ li a:hover, /** Ajouté **/
 
 .gallery img {
 	width: 100%;
-	max-height: 490px; /** Ajouté **/
+	max-height: 490px;
+	height: 90%;
+	object-fit: cover;
 
 }
 
@@ -413,6 +415,7 @@ form {
 .formPicturePreview {
 	height: 169px;
 	width: 129px;
+	object-fit: cover;
 }
 
 .labelPicturePreview {
