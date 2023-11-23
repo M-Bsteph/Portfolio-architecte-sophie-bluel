@@ -82,6 +82,9 @@ function retrieveModalGallery() {
 
         gallery.appendChild(figureModal);
       }
+    })
+    .catch((error) => {
+      console.log("Un problème est survenue lors de la récupération:", error);
     });
 }
 
@@ -95,14 +98,20 @@ function deletePicture(figureModal) {
       Accept: "*/*",
       Authorization: `Bearer ${token}`,
     },
-  }).then((Response) => {
-    if (Response.ok) {
-      retrieveModalGallery();
-      mainGallery();
-    } else {
-      window.alert("Une erreur s'est produite, le projet n'a pas été supprimé");
-    }
-  });
+  })
+    .then((Response) => {
+      if (Response.ok) {
+        retrieveModalGallery();
+        mainGallery();
+      } else {
+        window.alert(
+          "Une erreur s'est produite, le projet n'a pas été supprimé"
+        );
+      }
+    })
+    .catch((error) => {
+      console.log("Un problème est survenue lors de la suppresion:", error);
+    });
 }
 
 // Fonction pour ajouter une nouvelle image à la galerie modale
@@ -235,39 +244,40 @@ function sendNewProject({ formModal, pictureTitle, addFile, categoryName }) {
         Accept: "application/json",
       },
       body: formData,
-    }).then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        window.alert(
-          "Un problème est survenu, l'image n'a pas pu être ajoutée"
-        );
-      }
     })
-    .then(work => {
-      // Logguer la réponse du serveur
-      console.log(work);
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          window.alert(
+            "Un problème est survenu, l'image n'a pas pu être ajoutée"
+          );
+        }
+      })
+      .then((work) => {
+        // Logguer la réponse du serveur
+        console.log(work);
 
-      // Ajouter la nouvelle œuvre à la galerie principale
-      const gallery = document.querySelector(".gallery");
-      const figure = document.createElement("figure");
-      figure.setAttribute("data-id", work.categoryID);
-      const image = document.createElement("img");
-      image.src = work.imageUrl;
-      image.alt = work.titlle;
-      const figCaption = document.createElement("figcaption");
-      figCaption.innerText = work.tittle;
-      figure.appendChild(image);
-      figure.appendChild(figCaption);
-      gallery.appendChild(figure);
+        // Ajouter la nouvelle œuvre à la galerie principale
+        const gallery = document.querySelector(".gallery");
+        const figure = document.createElement("figure");
+        figure.setAttribute("data-id", work.categoryID);
+        const image = document.createElement("img");
+        image.src = work.imageUrl;
+        image.alt = work.titlle;
+        const figCaption = document.createElement("figcaption");
+        figCaption.innerText = work.tittle;
+        figure.appendChild(image);
+        figure.appendChild(figCaption);
+        gallery.appendChild(figure);
 
-      // Réinitialiser la modale et régénérer la galerie
-      modal.innerHTML = "";
-      modalGalleryElements();
-    })
-    .catch((error) => {
-      console.error("Erreur lors de l'ajout d'une nouvelle œuvre :", error);
-    });
+        // Réinitialiser la modale et régénérer la galerie
+        modal.innerHTML = "";
+        modalGalleryElements();
+      })
+      .catch((error) => {
+        console.error("Erreur lors de l'ajout d'une nouvelle œuvre :", error);
+      });
   });
 }
 
@@ -285,6 +295,9 @@ function categoriesOptions(modalAddPictureForm) {
           .querySelector(".categoryName")
           .appendChild(categoryChoice);
       });
+    })
+    .catch((error) => {
+      console.log("Un problème est survenue lors de la récupération:", error);
     });
 }
 
