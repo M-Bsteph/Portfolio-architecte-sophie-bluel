@@ -264,9 +264,9 @@ function sendNewProject({ formModal, pictureTitle, addFile, categoryName }) {
         figure.setAttribute("data-id", work.categoryID);
         const image = document.createElement("img");
         image.src = work.imageUrl;
-        image.alt = work.titlle;
+        image.alt = work.title;
         const figCaption = document.createElement("figcaption");
-        figCaption.innerText = work.tittle;
+        figCaption.innerText = work.title;
         figure.appendChild(image);
         figure.appendChild(figCaption);
         gallery.appendChild(figure);
